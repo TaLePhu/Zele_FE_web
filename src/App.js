@@ -1,14 +1,15 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Contact from '~/pages/Contact';
-import Home from '~/pages/Home';
+import { privateRoutes } from '~/routes';
 
 function App() {
     return (
         <Router>
             <div className="App">
                 <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/contact" element={<Contact />} />
+                    {privateRoutes.map((route, index) => {
+                        const Page = route.component;
+                        return <Route key={index} path={route.path} element={<Page />} />;
+                    })}
                 </Routes>
             </div>
         </Router>
