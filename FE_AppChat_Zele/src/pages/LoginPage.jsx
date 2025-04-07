@@ -9,7 +9,7 @@ const Container = styled(Box)({
   justifyContent: 'center',
   alignItems: 'center',
   height: '100vh',
-  backgroundColor: '#f0f2f5', // Màu nền nhẹ nhàng giống Zalo
+  backgroundColor: '#dfe8ef', // Màu nền nhẹ nhàng giống Zalo
 });
 
 const LoginBox = styled(Box)(({ theme }) => ({
