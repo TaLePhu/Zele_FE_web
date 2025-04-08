@@ -10,6 +10,8 @@ const RegisterPage = () => {
         name: '',
         password: '',
     });
+
+    const [loading, setLoading] = useState(false); // ✅ Thêm state loading
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const navigate = useNavigate();
@@ -19,6 +21,7 @@ const RegisterPage = () => {
     };
 
     const handleRegister = async () => {
+        setLoading(true); // ✅ Bật loading
         try {
             const res = await axios.post('http://localhost:5000/api/auth/register', formData);
             if (res.status === 200) {
@@ -35,6 +38,8 @@ const RegisterPage = () => {
             } else {
                 alert('Đăng ký không thành công. Vui lòng kiểm tra lại thông tin.');
             }
+        } finally {
+            setLoading(false); // ✅ Tắt loading dù thành công hay thất bại
         }
     };
 
@@ -98,11 +103,12 @@ const RegisterPage = () => {
                     fullWidth
                     sx={{ mt: 2 }}
                     onClick={handleRegister}
+                    disabled={loading} // ✅ Vô hiệu nút khi đang xử lý
                 >
-                    Đăng ký
+                    {loading ? "Đang xử lý..." : "Đăng ký"} {/* ✅ Đổi chữ theo trạng thái */}
                 </Button>
             </Paper>
-            
+
             {/* Snackbar thông báo đăng ký thành công */}
             <Snackbar
                 open={openSnackbar}

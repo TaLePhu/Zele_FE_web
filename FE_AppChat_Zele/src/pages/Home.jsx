@@ -6,8 +6,9 @@ const HomePage = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Xử lý đăng xuất và chuyển hướng về trang đăng nhập
-    navigate("/login");
+    navigate("/");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("user");
   };
 
   return (

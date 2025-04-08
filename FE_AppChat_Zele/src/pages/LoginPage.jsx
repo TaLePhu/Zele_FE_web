@@ -25,7 +25,7 @@ const LoginBox = styled(Box)(({ theme }) => ({
 const Title = styled(Typography)({
   fontSize: '32px',
   fontWeight: 'bold',
-  color: '#0068ff', // Màu xanh đặc trưng
+  color: '#0068ff',
   marginBottom: '24px',
 });
 
