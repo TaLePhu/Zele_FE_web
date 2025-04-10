@@ -8,26 +8,18 @@ import { Box } from '@mui/material';
 const Home = () => {
     const [selectedFriend, setSelectedFriend] = React.useState(null);
 
-     const handleLogout = () => {
+    const handleLogout = () => {
         localStorage.removeItem('token');
-        localStorage.removeItem('userInfo');    
+        localStorage.removeItem('userInfo');
         window.location.href = '/';
         console.log('Đăng xuất thành công');
-        
     };
     return (
         <Box display="flex" height="100vh" bgcolor="#f0f2f5">
             <SidebarIcons onLogout={handleLogout} />
-            <ChatList 
-                selectedFriend={selectedFriend} 
-                setSelectedFriend={setSelectedFriend} 
-            />
-            
-            {selectedFriend === null ? (
-                <WelcomeScreen />
-            ) : (
-                <ChatWindow selectedFriend={selectedFriend} />
-            )}
+            <ChatList selectedFriend={selectedFriend} setSelectedFriend={setSelectedFriend} />
+
+            {selectedFriend === null ? <WelcomeScreen /> : <ChatWindow selectedFriend={selectedFriend} />}
         </Box>
     );
 };
