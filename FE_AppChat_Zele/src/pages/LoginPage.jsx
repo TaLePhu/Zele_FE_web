@@ -9,7 +9,7 @@ const Container = styled(Box)({
   justifyContent: 'center',
   alignItems: 'center',
   height: '100vh',
-  backgroundColor: '#dfe8ef', // Màu nền nhẹ nhàng giống Zalo
+  backgroundColor: '#dfe8ef',
 });
 
 const LoginBox = styled(Box)(({ theme }) => ({
@@ -42,25 +42,46 @@ const LoginPage = () => {
   const [error, setError] = useState('');
 
   const handleLogin = async () => {
-    setLoading(true);
     setError('');
-    try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', { email, password });
-      const { user, accessToken } = response.data.data;
+    setLoading(true);
+  
+    const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+    let isValid = true;
+  
+  
+    if (!gmailRegex.test(email)) {
+      setError('Chỉ chấp nhận email hợp lệ (ví dụ: example@gmail.com).');
+      isValid = false;
+    }
 
-      // Lưu thông tin đăng nhập (JWT) vào localStorage
+    if (password.length < 6) {
+      setError('Mật khẩu phải có ít nhất 6 ký tự.');
+      isValid = false;
+    }
+  
+    if (!isValid) {
+      setLoading(false);
+      return;
+    }
+  
+    try {
+      const response = await axios.post('http://localhost:5000/api/auth/login', {
+        email,
+        password,
+      });
+  
+      const { user, accessToken } = response.data.data;
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('user', JSON.stringify(user));
-
-      // Chuyển hướng người dùng sau khi đăng nhập thành công
-      navigate('/home'); // Thay đổi route nếu cần
+  
+      navigate('/home');
     } catch (err) {
       setError('Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin.');
     } finally {
       setLoading(false);
     }
   };
-
+  
   return (
     <Container>
       <LoginBox>
