@@ -4,7 +4,7 @@ import { AttachFile as AttachFileIcon, TagFaces as EmojiIcon, Mic as MicIcon } f
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const MessageInput = ({ receiverId }) => {
+const MessageInput = ({ receiverId, setMessages }) => {
     const [messageContent, setMessageContent] = useState('');
 
     const sendMessage = async () => {
@@ -25,7 +25,9 @@ const MessageInput = ({ receiverId }) => {
                     },
                 },
             );
-            setMessageContent('');
+            let newMessage = response.data.data;
+            setMessages((prevMessages) => [...prevMessages, newMessage]); // Update the messages state with the new message
+            setMessageContent(''); // Clear the input field after sending the message
         } catch (error) {
             console.error('Error sending message:', error);
         }

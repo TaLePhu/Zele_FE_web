@@ -28,7 +28,6 @@ const ChatList = ({ selectedFriend, setSelectedFriend }) => {
                 },
             });
             setSonversations(response.data.data);
-            console.log('Conversations:', response.data.data);
             // set user from local storage
             const userInfo = JSON.parse(localStorage.getItem('user'));
 

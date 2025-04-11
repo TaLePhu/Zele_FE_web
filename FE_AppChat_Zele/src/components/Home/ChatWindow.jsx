@@ -30,14 +30,9 @@ const ChatWindow = ({ selectedFriend, setSelectedFriend }) => {
                 },
             );
             setMessages(response.data.data);
-            setReceiverId(
-                selectedFriend.participants.find((p) => p.user_id !== user._id)?.user_id ||
-                    messages.find((message) => message.sender_id._id !== user._id)?.sender_id._id,
-            );
-            setReceiver(
-                selectedFriend.participants.find((p) => p.user_id !== user._id) ||
-                    messages.find((message) => message.sender_id._id !== user._id)?.sender_id,
-            );
+            const newReceiver = selectedFriend.participants.find((p) => p.user_id !== user._id);
+            setReceiver(newReceiver);
+            setReceiverId(newReceiver?.user_id);
         } catch (error) {
             console.error('Error fetching messages:', error);
         }
@@ -90,14 +85,14 @@ const ChatWindow = ({ selectedFriend, setSelectedFriend }) => {
                 {messages.map((message, index) => (
                     <MessageBubble
                         key={index}
-                        sender={message.sender_id._id === user._id ? 'me' : 'friend'}
+                        sender={message?.sender_id?._id === user._id ? 'me' : 'friend'}
                         content={message.content}
                         time={message.time}
                     />
                 ))}
             </Box>
 
-            <MessageInput receiverId={receiverId} />
+            <MessageInput receiverId={receiverId} setMessages={setMessages} />
         </Box>
     );
 };
