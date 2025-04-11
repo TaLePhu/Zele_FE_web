@@ -3,43 +3,16 @@ import { Box, Typography, Avatar, IconButton } from '@mui/material';
 import { Search as SearchIcon, MoreVert as MoreVertIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import MessageBubble from './MessageBubble';
 import MessageInput from './MessageInput';
-import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import useChatStore from '../../store/chatStore';
 
-const messages = [
-    { sender: 'me', content: 'Hello bạn, bạn khỏe không?', time: '10:30 AM' },
-    { sender: 'friend', content: 'Mình khỏe, cảm ơn bạn! Còn bạn?', time: '10:31 AM' },
-    { sender: 'me', content: 'Mình cũng khỏe, đang làm dự án mới', time: '10:32 AM' },
-    { sender: 'friend', content: 'Nghe hay quá, chiều nay cafe nói thêm nhé', time: '10:33 AM' },
-];
-
-const ChatWindow = ({ selectedConversation, setSelectedConversation }) => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    const [messages, setMessages] = React.useState([]);
-    const [receiverId, setReceiverId] = React.useState(null);
-    const [receiver, setReceiver] = React.useState(null);
-    // http://localhost:5000/api/message/getByConversation/:conversationId
-    const fetchMessages = async () => {
-        try {
-            const response = await axios.get(
-                `http://localhost:5000/api/message/getByConversation/${selectedConversation._id}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-                    },
-                },
-            );
-            setMessages(response.data.data);
-            const newReceiver = selectedConversation.participants.find((p) => p.user_id !== user._id);
-            setReceiver(newReceiver);
-            setReceiverId(newReceiver?.user_id);
-        } catch (error) {
-            console.error('Error fetching messages:', error);
-        }
-    };
+const ChatWindow = () => {
+    const { user, messages, selectedConversation, fetchMessages, setSelectedConversation, receiver } = useChatStore();
 
     useEffect(() => {
-        fetchMessages();
+        if (selectedConversation) {
+            fetchMessages(selectedConversation._id);
+        }
     }, [selectedConversation]);
 
     return (
@@ -92,7 +65,7 @@ const ChatWindow = ({ selectedConversation, setSelectedConversation }) => {
                 ))}
             </Box>
 
-            <MessageInput receiverId={receiverId} setMessages={setMessages} />
+            <MessageInput receiverId={receiver?.user_id} />
         </Box>
     );
 };

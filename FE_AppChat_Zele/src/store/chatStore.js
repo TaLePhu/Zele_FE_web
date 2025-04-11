@@ -1,0 +1,101 @@
+import { create } from 'zustand';
+import axios from 'axios';
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:5000');
+
+const useChatStore = create((set, get) => ({
+    user: JSON.parse(localStorage.getItem('user')) || null,
+    conversations: [],
+    messages: [],
+    selectedConversation: null,
+    receiver: null,
+
+    fetchConversations: async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/api/conversation/getAll', {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+                },
+            });
+            set({ conversations: response.data.data });
+        } catch (error) {
+            console.error('Error fetching conversations:', error);
+        }
+    },
+
+    fetchMessages: async (conversationId) => {
+        try {
+            const response = await axios.get(`http://localhost:5000/api/message/getByConversation/${conversationId}`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+                },
+            });
+            set({ messages: response.data.data });
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+        }
+    },
+
+    sendMessage: async (receiverId, messageContent) => {
+        try {
+            const response = await axios.post(
+                'http://localhost:5000/api/message/send',
+                {
+                    receiverId,
+                    message_type: 'text',
+                    content: messageContent,
+                    file_id: null,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+                    },
+                },
+            );
+            set((state) => ({
+                messages: [...state.messages, response.data.data],
+            }));
+            console.log('Message sent successfully:', response.data.data);
+        } catch (error) {
+            console.error('Error sending message:', error);
+        }
+    },
+
+    setSelectedConversation: (conversation) => {
+        set({ selectedConversation: conversation });
+        console.log('Selected conversation:', conversation);
+        // Set receiver based on selected conversation
+
+        let receiver = null;
+        if (conversation) {
+            receiver = conversation.participants.find((p) => p.user_id !== get().user._id);
+        }
+        set({ receiver });
+        console.log('Receiver set to:', receiver);
+    },
+
+    setReceiver: (receiver) => {
+        set({ receiver });
+    },
+
+    initializeSocket: () => {
+        const user = get().user;
+        if (user) {
+            // Đăng ký userId với server qua Socket.IO
+            socket.emit('registerUser', user._id);
+
+            // Lắng nghe sự kiện nhận tin nhắn
+            socket.on('receiveMessage', (message) => {
+                console.log('New message received:', message);
+
+                // Cập nhật danh sách tin nhắn
+                set((state) => ({
+                    messages: [...state.messages, message],
+                }));
+            });
+        }
+    },
+}));
+
+export default useChatStore;

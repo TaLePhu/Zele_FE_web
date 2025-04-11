@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import {
     Box,
     List,
@@ -14,28 +14,10 @@ import {
     Avatar,
 } from '@mui/material';
 import { Search as SearchIcon } from '@mui/icons-material';
-import axios from 'axios';
+import useChatStore from '../../store/chatStore';
 
-const ChatList = ({ selectedConversation, setSelectedConversation }) => {
-    const [conversations, setSonversations] = useState([]);
-    const [user, setUser] = useState({});
-
-    const fetchConversations = async () => {
-        try {
-            const response = await axios.get('http://localhost:5000/api/conversation/getAll', {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-                },
-            });
-            setSonversations(response.data.data);
-            // set user from local storage
-            const userInfo = JSON.parse(localStorage.getItem('user'));
-
-            setUser(userInfo);
-        } catch (error) {
-            console.error('Error fetching conversations:', error);
-        }
-    };
+const ChatList = () => {
+    const { conversations, fetchConversations, selectedConversation, setSelectedConversation, user } = useChatStore();
 
     useEffect(() => {
         fetchConversations();
@@ -70,7 +52,7 @@ const ChatList = ({ selectedConversation, setSelectedConversation }) => {
                             <ListItem
                                 button
                                 alignItems="flex-start"
-                                selected={selectedConversation === index}
+                                selected={selectedConversation === con}
                                 onClick={() => setSelectedConversation(con)}
                                 sx={{
                                     '&.Mui-selected': {
@@ -89,23 +71,16 @@ const ChatList = ({ selectedConversation, setSelectedConversation }) => {
                                         color="success"
                                         invisible={false}
                                     >
-                                        {/* Lấy từ participants trong conversation, trong đó participant có id không phải là id của useruser */}
                                         <Avatar src={con.participants.find((p) => p.user_id !== user._id).avatar} />
                                     </Badge>
                                 </ListItemAvatar>
                                 <ListItemText
                                     primary={
                                         <Box display="flex" justifyContent="space-between">
-                                            {/* Lấy từ participants trong conversation, trong đó participant có id không phải là id của useruser */}
                                             <Typography fontWeight="bold">
                                                 {con.participants.find((p) => p.user_id !== user._id).name}
                                             </Typography>
                                             <Typography variant="caption" color="textSecondary">
-                                                {/* Lấy từ last_message.timestamp trong conversation */}
-                                                {/* Chuyển đổi timestamp thành thời gian hiển thị */}
-                                                {/* 2025-04-10T17:02:22.400+00:00 chuyển đổi sang giờ việt nam,
-                                                    nếu không phải ngày hôm nay thì hiển thị ngày tháng năm,
-                                                    nếu là ngày hôm nay thì hiển thị giờ phút */}
                                                 {new Date(con.last_message.timestamp).toLocaleString('vi-VN', {
                                                     year: 'numeric',
                                                     month: '2-digit',

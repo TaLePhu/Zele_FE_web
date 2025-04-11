@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { privateRoutes } from '~/routes';
 import { DefaultLayout } from '~/components/Layout';
 import { Fragment } from 'react';
+import useSocketStore from './store/socketStore';
+import React from 'react';
 
 function App() {
     return (
