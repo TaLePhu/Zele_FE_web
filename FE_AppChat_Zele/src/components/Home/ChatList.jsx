@@ -16,7 +16,7 @@ import {
 import { Search as SearchIcon } from '@mui/icons-material';
 import axios from 'axios';
 
-const ChatList = ({ selectedFriend, setSelectedFriend }) => {
+const ChatList = ({ selectedConversation, setSelectedConversation }) => {
     const [conversations, setSonversations] = useState([]);
     const [user, setUser] = useState({});
 
@@ -70,8 +70,8 @@ const ChatList = ({ selectedFriend, setSelectedFriend }) => {
                             <ListItem
                                 button
                                 alignItems="flex-start"
-                                selected={selectedFriend === index}
-                                onClick={() => setSelectedFriend(con)}
+                                selected={selectedConversation === index}
+                                onClick={() => setSelectedConversation(con)}
                                 sx={{
                                     '&.Mui-selected': {
                                         backgroundColor: '#e5efff',

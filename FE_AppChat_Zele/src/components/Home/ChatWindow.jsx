@@ -13,7 +13,7 @@ const messages = [
     { sender: 'friend', content: 'Nghe hay quá, chiều nay cafe nói thêm nhé', time: '10:33 AM' },
 ];
 
-const ChatWindow = ({ selectedFriend, setSelectedFriend }) => {
+const ChatWindow = ({ selectedConversation, setSelectedConversation }) => {
     const user = JSON.parse(localStorage.getItem('user'));
     const [messages, setMessages] = React.useState([]);
     const [receiverId, setReceiverId] = React.useState(null);
@@ -22,7 +22,7 @@ const ChatWindow = ({ selectedFriend, setSelectedFriend }) => {
     const fetchMessages = async () => {
         try {
             const response = await axios.get(
-                `http://localhost:5000/api/message/getByConversation/${selectedFriend._id}`,
+                `http://localhost:5000/api/message/getByConversation/${selectedConversation._id}`,
                 {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
@@ -30,7 +30,7 @@ const ChatWindow = ({ selectedFriend, setSelectedFriend }) => {
                 },
             );
             setMessages(response.data.data);
-            const newReceiver = selectedFriend.participants.find((p) => p.user_id !== user._id);
+            const newReceiver = selectedConversation.participants.find((p) => p.user_id !== user._id);
             setReceiver(newReceiver);
             setReceiverId(newReceiver?.user_id);
         } catch (error) {
@@ -40,12 +40,12 @@ const ChatWindow = ({ selectedFriend, setSelectedFriend }) => {
 
     useEffect(() => {
         fetchMessages();
-    }, [selectedFriend]);
+    }, [selectedConversation]);
 
     return (
         <Box flex={1} display="flex" flexDirection="column">
             <Box p={1.5} bgcolor="white" display="flex" alignItems="center" borderBottom="1px solid #e5e5e5">
-                <IconButton sx={{ display: { sm: 'none' }, mr: 1 }} onClick={() => setSelectedFriend(null)}>
+                <IconButton sx={{ display: { sm: 'none' }, mr: 1 }} onClick={() => setSelectedConversation(null)}>
                     <ArrowBackIcon />
                 </IconButton>
                 <Avatar
@@ -58,10 +58,10 @@ const ChatWindow = ({ selectedFriend, setSelectedFriend }) => {
                 />
                 <Box flex={1}>
                     <Typography fontWeight="bold">
-                        {selectedFriend.participants.find((p) => p.user_id !== user._id)?.name}
+                        {selectedConversation.participants.find((p) => p.user_id !== user._id)?.name}
                     </Typography>
                     <Typography variant="caption" color="textSecondary">
-                        {setSelectedFriend?.online ? 'Online' : 'Offline'}
+                        {setSelectedConversation?.online ? 'Online' : 'Offline'}
                     </Typography>
                 </Box>
                 <IconButton>

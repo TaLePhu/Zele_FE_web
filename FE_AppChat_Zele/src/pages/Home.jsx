@@ -8,7 +8,7 @@ import { Box } from '@mui/material';
 // import { useSelector } from "react-redux";
 
 const Home = () => {
-    const [selectedFriend, setSelectedFriend] = React.useState(null);
+    const [selectedConversation, setSelectedConversation] = React.useState(null);
     const user = JSON.parse(localStorage.getItem('user'));
     // const currentUser = useSelector((state) => state.user.currentUser);
 
@@ -22,9 +22,13 @@ const Home = () => {
         <Box display="flex" height="100vh" bgcolor="#f0f2f5">
             <Header username={user ? user.name : ''} />
             <SidebarIcons onLogout={handleLogout} />
-            <ChatList selectedFriend={selectedFriend} setSelectedFriend={setSelectedFriend} />
+            <ChatList selectedConversation={selectedConversation} setSelectedConversation={setSelectedConversation} />
 
-            {selectedFriend === null ? <WelcomeScreen /> : <ChatWindow selectedFriend={selectedFriend} />}
+            {selectedConversation === null ? (
+                <WelcomeScreen />
+            ) : (
+                <ChatWindow selectedConversation={selectedConversation} />
+            )}
         </Box>
     );
 };
