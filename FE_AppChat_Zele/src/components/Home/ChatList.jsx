@@ -28,8 +28,10 @@ const ChatList = ({ selectedFriend, setSelectedFriend }) => {
                 },
             });
             setSonversations(response.data.data);
+            console.log('Conversations:', response.data.data);
             // set user from local storage
             const userInfo = JSON.parse(localStorage.getItem('user'));
+
             setUser(userInfo);
         } catch (error) {
             console.error('Error fetching conversations:', error);
@@ -89,7 +91,7 @@ const ChatList = ({ selectedFriend, setSelectedFriend }) => {
                                         invisible={false}
                                     >
                                         {/* Lấy từ participants trong conversation, trong đó participant có id không phải là id của useruser */}
-                                        <Avatar src={con.participants.find((p) => p._id !== user._id).avatar} />
+                                        <Avatar src={con.participants.find((p) => p.user_id !== user._id).avatar} />
                                     </Badge>
                                 </ListItemAvatar>
                                 <ListItemText
@@ -97,7 +99,7 @@ const ChatList = ({ selectedFriend, setSelectedFriend }) => {
                                         <Box display="flex" justifyContent="space-between">
                                             {/* Lấy từ participants trong conversation, trong đó participant có id không phải là id của useruser */}
                                             <Typography fontWeight="bold">
-                                                {con.participants.find((p) => p._id !== user._id).name}
+                                                {con.participants.find((p) => p.user_id !== user._id).name}
                                             </Typography>
                                             <Typography variant="caption" color="textSecondary">
                                                 {/* Lấy từ last_message.timestamp trong conversation */}

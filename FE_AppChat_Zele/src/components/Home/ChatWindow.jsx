@@ -17,6 +17,7 @@ const ChatWindow = ({ selectedFriend, setSelectedFriend }) => {
     const user = JSON.parse(localStorage.getItem('user'));
     const [messages, setMessages] = React.useState([]);
     const [receiverId, setReceiverId] = React.useState(null);
+    const [receiver, setReceiver] = React.useState(null);
     // http://localhost:5000/api/message/getByConversation/:conversationId
     const fetchMessages = async () => {
         try {
@@ -33,6 +34,10 @@ const ChatWindow = ({ selectedFriend, setSelectedFriend }) => {
                 selectedFriend.participants.find((p) => p.user_id !== user._id)?.user_id ||
                     messages.find((message) => message.sender_id._id !== user._id)?.sender_id._id,
             );
+            setReceiver(
+                selectedFriend.participants.find((p) => p.user_id !== user._id) ||
+                    messages.find((message) => message.sender_id._id !== user._id)?.sender_id,
+            );
         } catch (error) {
             console.error('Error fetching messages:', error);
         }
@@ -48,7 +53,14 @@ const ChatWindow = ({ selectedFriend, setSelectedFriend }) => {
                 <IconButton sx={{ display: { sm: 'none' }, mr: 1 }} onClick={() => setSelectedFriend(null)}>
                     <ArrowBackIcon />
                 </IconButton>
-                <Avatar src={setSelectedFriend?.avatar || 'https://i.pravatar.cc/150?img=0'} sx={{ mr: 2 }} />
+                <Avatar
+                    src={
+                        receiver?.primary_avatar?.length > 0
+                            ? receiver?.primary_avatar
+                            : 'https://i.pravatar.cc/150?img=0'
+                    }
+                    sx={{ mr: 2 }}
+                />
                 <Box flex={1}>
                     <Typography fontWeight="bold">
                         {selectedFriend.participants.find((p) => p.user_id !== user._id)?.name}

@@ -25,7 +25,6 @@ const MessageInput = ({ receiverId }) => {
                     },
                 },
             );
-            console.log('Message sent:', response.data.data);
             setMessageContent('');
         } catch (error) {
             console.error('Error sending message:', error);
@@ -66,9 +65,7 @@ const MessageInput = ({ receiverId }) => {
                         sendMessage();
                     }
                 }}
-                onFocus={() => {
-                    console.log('Đã nhấn vào ô nhập tin nhắn');
-                }}
+                onFocus={() => {}}
             />
             <IconButton onClick={() => handleSendMessage()} disabled={!messageContent.trim()}>
                 <MicIcon />
