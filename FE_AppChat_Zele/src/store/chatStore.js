@@ -56,7 +56,6 @@ const useChatStore = create((set, get) => ({
             set((state) => ({
                 messages: [...state.messages, response.data.data],
             }));
-            console.log('Message sent successfully:', response.data.data);
         } catch (error) {
             console.error('Error sending message:', error);
         }
@@ -85,8 +84,15 @@ const useChatStore = create((set, get) => ({
             // Đăng ký userId với server qua Socket.IO
             socket.emit('registerUser', user._id);
 
+            // Xóa listener cũ trước khi đăng ký mới
+            socket.off('receiveMessage');
+
             // Lắng nghe sự kiện nhận tin nhắn
             socket.on('receiveMessage', (message) => {
+                // Kiểm tra xem tin nhắn có thuộc về người dùng hiện tại không
+                if (message.receiver_id._id !== user._id) {
+                    return;
+                }
                 console.log('New message received:', message);
 
                 // Cập nhật danh sách tin nhắn

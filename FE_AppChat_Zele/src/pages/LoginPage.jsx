@@ -3,7 +3,6 @@ import { TextField, Button, Box, Typography, CircularProgress, Divider } from '@
 import { styled } from '@mui/system';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import useChatStore from '~/store/chatStore';
 
 const Container = styled(Box)({
     display: 'flex',
@@ -41,7 +40,6 @@ const LoginPage = () => {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const { initializeSocket } = useChatStore();
     const handleLogin = async () => {
         setError('');
         setLoading(true);
@@ -73,7 +71,6 @@ const LoginPage = () => {
             const { user, accessToken } = response.data.data;
             localStorage.setItem('accessToken', accessToken);
             localStorage.setItem('user', JSON.stringify(user));
-            initializeSocket(); // Initialize socket connection with user ID
             navigate('/home');
         } catch (err) {
             setError('Đăng nhập không thành công. Vui lòng kiểm tra lại thông tin.');
