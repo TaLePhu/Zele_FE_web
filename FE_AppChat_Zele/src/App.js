@@ -6,10 +6,11 @@ import useChatStore from './store/chatStore';
 import React from 'react';
 
 function App() {
-    const { initializeSocket } = useChatStore();
+    const { initializeSocket, user } = useChatStore();
+
     React.useEffect(() => {
         initializeSocket();
-    }, []);
+    }, [initializeSocket, user]);
 
     return (
         <Router>

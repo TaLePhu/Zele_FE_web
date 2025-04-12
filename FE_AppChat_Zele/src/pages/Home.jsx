@@ -9,10 +9,12 @@ import useChatStore from '../store/chatStore';
 
 const Home = () => {
     const { user, selectedConversation, setSelectedConversation } = useChatStore();
+    const { disconnectSocket } = useChatStore();
 
     const handleLogout = () => {
         localStorage.removeItem('token');
-        localStorage.removeItem('userInfo');
+        localStorage.removeItem('user');
+        disconnectSocket();
         window.location.href = '/';
         console.log('Đăng xuất thành công');
     };

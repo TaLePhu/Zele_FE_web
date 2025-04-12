@@ -68,7 +68,7 @@ const useChatStore = create((set, get) => ({
 
         let receiver = null;
         if (conversation) {
-            receiver = conversation.participants.find((p) => p.user_id !== get().user._id);
+            receiver = conversation.participants.find((p) => p.user_id !== get().user?._id);
         }
         set({ receiver });
         console.log('Receiver set to:', receiver);
@@ -80,6 +80,7 @@ const useChatStore = create((set, get) => ({
 
     initializeSocket: () => {
         const user = get().user;
+        console.log('Initializing socket for user:', user);
         if (user) {
             // Đăng ký userId với server qua Socket.IO
             socket.emit('registerUser', user._id);
@@ -90,7 +91,7 @@ const useChatStore = create((set, get) => ({
             // Lắng nghe sự kiện nhận tin nhắn
             socket.on('receiveMessage', (message) => {
                 // Kiểm tra xem tin nhắn có thuộc về người dùng hiện tại không
-                if (message.receiver_id._id !== user._id) {
+                if (message?.receiver_id?._id !== user?._id) {
                     return;
                 }
                 console.log('New message received:', message);
@@ -101,6 +102,11 @@ const useChatStore = create((set, get) => ({
                 }));
             });
         }
+    },
+
+    disconnectSocket: () => {
+        socket.disconnect(); // Ngắt kết nối socket
+        console.log('Socket disconnected');
     },
 }));
 

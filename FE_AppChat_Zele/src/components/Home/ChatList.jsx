@@ -71,14 +71,14 @@ const ChatList = () => {
                                         color="success"
                                         invisible={false}
                                     >
-                                        <Avatar src={con.participants.find((p) => p.user_id !== user._id).avatar} />
+                                        <Avatar src={con.participants.find((p) => p.user_id !== user?._id).avatar} />
                                     </Badge>
                                 </ListItemAvatar>
                                 <ListItemText
                                     primary={
                                         <Box display="flex" justifyContent="space-between">
                                             <Typography fontWeight="bold">
-                                                {con.participants.find((p) => p.user_id !== user._id).name}
+                                                {con.participants.find((p) => p.user_id !== user?._id).name}
                                             </Typography>
                                             <Typography variant="caption" color="textSecondary">
                                                 {new Date(con.last_message.timestamp).toLocaleString('vi-VN', {

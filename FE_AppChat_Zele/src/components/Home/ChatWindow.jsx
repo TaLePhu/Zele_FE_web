@@ -11,7 +11,7 @@ const ChatWindow = () => {
 
     useEffect(() => {
         if (selectedConversation) {
-            fetchMessages(selectedConversation._id);
+            fetchMessages(selectedConversation?._id);
         }
     }, [selectedConversation]);
 
@@ -31,7 +31,7 @@ const ChatWindow = () => {
                 />
                 <Box flex={1}>
                     <Typography fontWeight="bold">
-                        {selectedConversation.participants.find((p) => p.user_id !== user._id)?.name}
+                        {selectedConversation.participants.find((p) => p.user_id !== user?._id)?.name}
                     </Typography>
                     <Typography variant="caption" color="textSecondary">
                         {setSelectedConversation?.online ? 'Online' : 'Offline'}
@@ -58,7 +58,7 @@ const ChatWindow = () => {
                 {messages.map((message, index) => (
                     <MessageBubble
                         key={index}
-                        sender={message?.sender_id?._id === user._id ? 'me' : 'friend'}
+                        sender={message?.sender_id?._id === user?._id ? 'me' : 'friend'}
                         content={message.content}
                         time={message.time}
                     />
