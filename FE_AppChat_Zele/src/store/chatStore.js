@@ -87,6 +87,8 @@ const useChatStore = create((set, get) => ({
 
             // Xóa listener cũ trước khi đăng ký mới
             socket.off('receiveMessage');
+            socket.off('newConversation');
+            socket.off('updateLastMessage');
 
             // Lắng nghe sự kiện nhận tin nhắn
             socket.on('receiveMessage', (message) => {
@@ -99,6 +101,24 @@ const useChatStore = create((set, get) => ({
                 // Cập nhật danh sách tin nhắn
                 set((state) => ({
                     messages: [...state.messages, message],
+                }));
+            });
+
+            // Lắng nghe sự kiện đoạn hội thoại mới
+            socket.on('newConversation', (conversation) => {
+                console.log('New conversation received:', conversation);
+                set((state) => ({
+                    conversations: [...state.conversations, conversation],
+                }));
+            });
+
+            // Lắng nghe sự kiện cập nhật tin nhắn cuối cùng
+            socket.on('updateLastMessage', (updatedConversation) => {
+                console.log('Conversation updated with last message:', updatedConversation);
+                set((state) => ({
+                    conversations: state.conversations.map((conv) =>
+                        conv._id === updatedConversation._id ? updatedConversation : conv,
+                    ),
                 }));
             });
         }
