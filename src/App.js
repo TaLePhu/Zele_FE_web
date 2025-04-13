@@ -7,7 +7,9 @@ import VerifyOtpPage from './pages/VerifyOtpPage';
 import { useState, useEffect } from 'react';
 
 function App() {
-    const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('accessToken'));
+    const DEV_MODE = true;
+    // const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('accessToken'));
+    const [isAuthenticated, setIsAuthenticated] = useState(DEV_MODE ? true : !!localStorage.getItem('accessToken'));
 
     useEffect(() => {
         const handleStorageChange = () => {
@@ -35,13 +37,7 @@ function App() {
                 {/* Trang đăng ký */}
                 <Route
                     path="/register"
-                    element={
-                        isAuthenticated ? (
-                            <Navigate to="/home" replace />
-                        ) : (
-                            <RegisterPage />
-                        )
-                    }
+                    element={isAuthenticated ? <Navigate to="/home" replace /> : <RegisterPage />}
                 />
 
                 {/* Trang xác thực OTP */}
