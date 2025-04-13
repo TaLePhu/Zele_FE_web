@@ -1,4 +1,45 @@
 .wrapper {
-    background-color: #ebecf0;
     min-height: 800px;
+}
+
+.chat-item__img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50px;
+}
+
+.inner {
+}
+
+.list-chat {
+}
+
+.chat-item {
+    padding: 16px;
+    display: flex;
+    align-items: center;
+
+    &:hover {
+        background-color: var(--sidebar-color-hover);
+        cursor: pointer;
+    }
+}
+
+.chat-item__img {
+    margin-right: 16px;
+}
+
+.chat-item__body {
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-item__name {
+    font-size: 1.6rem;
+    color: var(--text-color);
+}
+
+.chat-item__desc {
+    font-size: 1.4rem;
+    color: #707c8f;
 }

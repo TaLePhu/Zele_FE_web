@@ -11,31 +11,31 @@ const Sidebar = () => {
         <div className={cx('wrapper')}>
             <div className={cx('inner')}>
                 <div className={cx('above')}>
-                    <button className={cx('user-image')}>
+                    <button className={cx('user-image', 'sidebar-icon')}>
                         <FontAwesomeIcon icon={faUser} />
                     </button>
-                    <button className={cx('chat')}>
+                    <button className={cx('chat', 'sidebar-icon')}>
                         <FontAwesomeIcon icon={faComment} />
                     </button>
-                    <button className={cx('contact')}>
+                    <button className={cx('contact', 'sidebar-icon')}>
                         <FontAwesomeIcon icon={faAddressBook} />
                     </button>
-                    <button className={cx('todo')}>
+                    <button className={cx('todo', 'sidebar-icon')}>
                         <FontAwesomeIcon icon={faSquareCheck} />
                     </button>
                 </div>
 
                 <div className={cx('below')}>
-                    <button className={cx('cloud1')}>
+                    <button className={cx('cloud1', 'sidebar-icon')}>
                         <FontAwesomeIcon icon={faCloudArrowUp} />
                     </button>
-                    <button className={cx('cloud2')}>
+                    <button className={cx('cloud2', 'sidebar-icon')}>
                         <FontAwesomeIcon icon={faCloud} />
                     </button>
-                    <button className={cx('tool')}>
+                    <button className={cx('tool', 'sidebar-icon')}>
                         <FontAwesomeIcon icon={faToolbox} />
                     </button>
-                    <button className={cx('setting')}>
+                    <button className={cx('setting', 'sidebar-icon')}>
                         <FontAwesomeIcon icon={faGear} />
                     </button>
                 </div>
