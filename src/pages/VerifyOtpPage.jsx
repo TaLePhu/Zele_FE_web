@@ -111,4 +111,3 @@ const VerifyOtpPage = ({ setIsAuthenticated }) => {
 };
 
 export default VerifyOtpPage;
-

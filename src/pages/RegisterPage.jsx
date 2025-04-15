@@ -11,7 +11,7 @@ const RegisterPage = () => {
         password: '',
     });
 
-    const [loading, setLoading] = useState(false); // Thêm state loading
+    const [loading, setLoading] = useState(false);
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const navigate = useNavigate();
@@ -21,17 +21,13 @@ const RegisterPage = () => {
     };
 
     const handleRegister = async () => {
-        setLoading(true); // Bật loading
+        setLoading(true); 
         try {
             const res = await axios.post('http://localhost:5000/api/auth/register', formData);
             if (res.status === 201) {
                 setSnackbarMessage('Đăng ký thành công! Vui lòng kiểm tra email để xác thực OTP.');
                 setOpenSnackbar(true);
-                
-                //  Delay điều hướng cho đến khi snackbar tự đóng
-                setTimeout(() => {
-                    navigate("/verify-otp", { state: { email: formData.email } });
-                }, 3000); // Khớp với autoHideDuration của Snackbar
+                navigate("/verify-otp", { state: { email: formData.email } });
                 console.log('Đăng ký thành công:', res.data);
             }
         } catch (error) {
@@ -43,7 +39,7 @@ const RegisterPage = () => {
                 alert('Đăng ký không thành công. Vui lòng kiểm tra lại thông tin.');
             }
         } finally {
-            setLoading(false); //  Tắt loading dù thành công hay thất bại
+            setLoading(false); // ✅ Tắt loading dù thành công hay thất bại
         }
     };
 
@@ -107,9 +103,9 @@ const RegisterPage = () => {
                     fullWidth
                     sx={{ mt: 2 }}
                     onClick={handleRegister}
-                    disabled={loading} // Vô hiệu nút khi đang xử lý
+                    disabled={loading} // ✅ Vô hiệu nút khi đang xử lý
                 >
-                    {loading ? "Đang xử lý..." : "Đăng ký"} {/* Đổi chữ theo trạng thái */}
+                    {loading ? "Đang xử lý..." : "Đăng ký"} {/* ✅ Đổi chữ theo trạng thái */}
                 </Button>
             </Paper>
 

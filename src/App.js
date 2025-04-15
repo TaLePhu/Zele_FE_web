@@ -1,79 +1,99 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { privateRoutes } from '~/routes';
+import { privateRoutes, publicRoutes } from '~/routes';
 import { DefaultLayout } from '~/components/Layout';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import VerifyOtpPage from './pages/VerifyOtpPage';
 import { useState, useEffect } from 'react';
+import { Fragment } from 'react';
+import { useLocation } from 'react-router-dom';
+import socket from './socket/socket';
+
+
 
 function App() {
-    const DEV_MODE = true;
-    // const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('accessToken'));
-    const [isAuthenticated, setIsAuthenticated] = useState(DEV_MODE ? true : !!localStorage.getItem('accessToken'));
+    const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('accessToken'));
 
     useEffect(() => {
-        const handleStorageChange = () => {
-            setIsAuthenticated(!!localStorage.getItem('accessToken'));
+        const checkAuth = () => {
+            const token = localStorage.getItem('accessToken');
+            setIsAuthenticated(!!token);
+
+            // Nếu có token thì đăng ký socket
+            const userId = localStorage.getItem('userId');
+            if (token && userId) {
+                socket.emit('registerUser', userId);
+            }
         };
-        window.addEventListener('storage', handleStorageChange);
-        return () => window.removeEventListener('storage', handleStorageChange);
+
+        checkAuth(); // gọi ngay khi load
+
+        window.addEventListener('storage', checkAuth);
+        return () => window.removeEventListener('storage', checkAuth);
     }, []);
 
-    return (
-        <Router>
+
+    // Tạo component con để sử dụng useLocation
+    const AuthWrapper = () => {
+        const location = useLocation();
+
+        const RequireAuth = ({ children }) => {
+            if (!isAuthenticated) {
+                return <Navigate to="/" state={{ from: location.pathname }} replace />;
+            }
+            return children;
+        };
+
+        const RedirectIfAuth = ({ children }) => {
+            if (isAuthenticated) {
+                return <Navigate to="/home" replace />;
+            }
+            return children;
+        };
+
+        return (
             <Routes>
-                {/* Trang đăng nhập */}
-                <Route
-                    path="/"
-                    element={
-                        isAuthenticated ? (
-                            <Navigate to="/home" replace />
-                        ) : (
-                            <LoginPage setIsAuthenticated={setIsAuthenticated} />
-                        )
-                    }
-                />
-
-                {/* Trang đăng ký */}
-                <Route
-                    path="/register"
-                    element={isAuthenticated ? <Navigate to="/home" replace /> : <RegisterPage />}
-                />
-
-                {/* Trang xác thực OTP */}
-                <Route
-                    path="/verify-otp"
-                    element={
-                        isAuthenticated ? (
-                            <Navigate to="/home" replace />
-                        ) : (
-                            <VerifyOtpPage setIsAuthenticated={setIsAuthenticated} />
-                        )
-                    }
-                />
-
-                {/* Các route riêng tư (yêu cầu đăng nhập) */}
-                {privateRoutes.map((route, index) => {
-                    const Layout = route.layout || DefaultLayout;
-                    const Page = route.component;
-
+                {/* Public routes */}
+                {publicRoutes.map((route) => {
+                    const Layout = route.layout === null ? Fragment : DefaultLayout;
+                    const Element = route.component;
                     return (
                         <Route
-                            key={index}
+                            key={route.path}
                             path={route.path}
                             element={
-                                isAuthenticated ? (
+                                <RedirectIfAuth>
                                     <Layout>
-                                        <Page />
+                                        <Element setIsAuthenticated={setIsAuthenticated} />
                                     </Layout>
-                                ) : (
-                                    <Navigate to="/" replace />
-                                )
+                                </RedirectIfAuth>
+                            }
+                        />
+                    );
+                })}
+
+                {/* Private routes */}
+                {privateRoutes.map((route) => {
+                    const Layout = route.layout === null ? Fragment : DefaultLayout;
+                    const Element = route.component;
+                    return (
+                        <Route
+                            key={route.path}
+                            path={route.path}
+                            element={
+                                <RequireAuth>
+                                    <Layout>
+                                        <Element />
+                                    </Layout>
+                                </RequireAuth>
                             }
                         />
                     );
                 })}
             </Routes>
+        );
+    };
+
+    return (
+        <Router>
+            <AuthWrapper />
         </Router>
     );
 }
