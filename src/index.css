@@ -1,68 +1,254 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  --messenger-blue: #0084ff;
+  --light-gray: #f0f2f5;
+}
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Ngăn chặn cuộn trang */
+}
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+/* Tùy chỉnh thanh cuộn cho các phần tử con có thể cuộn */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+::-webkit-scrollbar-thumb {
+  background: #bcc0c4;
+  border-radius: 4px;
 }
 
+::-webkit-scrollbar-thumb:hover {
+  background: #a8adb3;
+}
+
+/* Ẩn thanh cuộn nhưng vẫn giữ chức năng cuộn */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
+
+/* Hiệu ứng hover cho các item */
+.hover-effect {
+  transition: background-color 0.2s ease;
+}
+
+/* Tùy chỉnh kiểu chữ tin nhắn */
+.message-text {
+  line-height: 1.28;
+}
+
+/* Hiệu ứng nút */
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  transition: all 0.2s ease;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+/* Modal animations */
+.modal-enter {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.modal-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 300ms ease-in-out, transform 300ms ease-in-out;
+}
+
+.modal-exit {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.modal-exit-active {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 300ms ease-in-out, transform 300ms ease-in-out;
+}
+
+/* Slide animations */
+.slide-in-right {
+  transform: translateX(100%);
+  animation: slideInRight 0.3s forwards;
+}
+
+.slide-out-right {
+  animation: slideOutRight 0.3s forwards;
+}
+
+.slide-in-left {
+  transform: translateX(-100%);
+  animation: slideInLeft 0.3s forwards;
+}
+
+.slide-out-left {
+  animation: slideOutLeft 0.3s forwards;
+}
+
+@keyframes slideInRight {
+  to {
+    transform: translateX(0);
   }
-  a:hover {
-    color: #747bff;
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
   }
-  button {
-    background-color: #f9f9f9;
+  to {
+    transform: translateX(100%);
   }
+}
+
+@keyframes slideInLeft {
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutLeft {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+/* Fade animations */
+.fade-in {
+  opacity: 0;
+  animation: fadeIn 0.3s forwards;
+}
+
+.fade-out {
+  animation: fadeOut 0.3s forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Custom modal transitions for daisyUI */
+.custom-modal {
+  transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+.custom-modal.entering,
+.custom-modal.exiting {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.custom-modal.entered {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.custom-modal-backdrop {
+  transition: opacity 0.3s ease-out;
+}
+
+.custom-modal-backdrop.entering,
+.custom-modal-backdrop.exiting {
+  opacity: 0;
+}
+
+.custom-modal-backdrop.entered {
+  opacity: 1;
+}
+
+/* Styles cho modal profile */
+.profile-modal-box {
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-mode-container {
+  width: 100%;
+  position: relative;
+  transition: transform 0.3s ease-in-out;
+}
+
+.profile-mode-wrapper {
+  width: 100%;
+  display: flex;
+}
+
+.profile-mode {
+  min-width: 100%;
+  flex-shrink: 0;
+}
+
+/* Hiệu ứng slide */
+.slide-enter {
+  transform: translateX(100%);
+}
+
+.slide-enter-active {
+  transform: translateX(0);
+  transition: transform 300ms ease-in-out;
+}
+
+.slide-exit {
+  transform: translateX(0);
+}
+
+.slide-exit-active {
+  transform: translateX(-100%);
+  transition: transform 300ms ease-in-out;
+}
+
+.slide-back-enter {
+  transform: translateX(-100%);
+}
+
+.slide-back-enter-active {
+  transform: translateX(0);
+  transition: transform 300ms ease-in-out;
+}
+
+.slide-back-exit {
+  transform: translateX(0);
+}
+
+.slide-back-exit-active {
+  transform: translateX(100%);
+  transition: transform 300ms ease-in-out;
 }

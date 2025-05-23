@@ -1,113 +1,182 @@
-import React, { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";  // Ensure these are imported
-import { Box, Typography, TextField, Button, CircularProgress } from "@mui/material";  // Import MUI components
-import axios from "axios";  // Import axios for API calls
+import React, { useState, useEffect, useRef } from "react";
+import { useLocation, useNavigate, Link } from "react-router-dom";
+import Button from "../components/common/Button";
+import useAuthStore from "../stores/authStore";
+import { toast } from "react-hot-toast";
+import { useRedirectIfAuthenticated } from "../hooks/useAuth";
 
-
-const VerifyOtpPage = ({ setIsAuthenticated }) => {
+const VerifyOTPPage = () => {
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const inputRefs = useRef([]);
+  const [countdown, setCountdown] = useState(60);
+  const [canResend, setCanResend] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const email = location.state?.email || "";
+  const { verifyOTP, resendOTP, isLoading, error, resetError } = useAuthStore();
+  const [resendLoading, setResendLoading] = useState(false);
+  const { isLoading: isCheckingAuth } = useRedirectIfAuthenticated();
 
-  const [otp, setOtp] = useState("");
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
+  // Nếu không có email, chuyển hướng về trang đăng ký
+  useEffect(() => {
+    if (!email) {
+      navigate("/register");
+    }
+  }, [email, navigate]);
 
-  if (!email) {
-    navigate("/login");
+  // Hiển thị thông báo lỗi nếu có
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      resetError();
+    }
+  }, [error, resetError]);
+
+  // Đếm ngược thời gian có thể gửi lại OTP
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setTimeout(() => {
+        setCountdown(countdown - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else {
+      setCanResend(true);
+    }
+  }, [countdown]);
+
+  // Xử lý nhập OTP
+  const handleOtpChange = (e, index) => {
+    const value = e.target.value;
+    if (isNaN(value)) return;
+
+    const newOtp = [...otp];
+    // Chỉ lấy ký tự đầu tiên
+    newOtp[index] = value.substring(0, 1);
+    setOtp(newOtp);
+
+    // Tự động focus vào ô tiếp theo
+    if (value && index < 5) {
+      inputRefs.current[index + 1].focus();
+    }
+  };
+
+  // Xử lý phím xóa để quay lại ô trước
+  const handleKeyDown = (e, index) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      inputRefs.current[index - 1].focus();
+    }
+  };
+
+  // Gửi lại mã OTP
+  const handleResendOTP = async () => {
+    setResendLoading(true);
+    const result = await resendOTP(email);
+    setResendLoading(false);
+
+    if (result.success) {
+      toast.success("Mã OTP đã được gửi lại thành công!");
+      setCountdown(60);
+      setCanResend(false);
+      // Reset các ô OTP
+      setOtp(["", "", "", "", "", ""]);
+      inputRefs.current[0].focus();
+    }
+  };
+
+  // Xác thực OTP
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const otpValue = otp.join("");
+
+    if (otpValue.length !== 6) {
+      toast.error("Vui lòng nhập đủ 6 chữ số OTP");
+      return;
+    }
+
+    const result = await verifyOTP(email, otpValue);
+    if (result.success) {
+      toast.success("Xác thực tài khoản thành công!");
+      navigate("/login");
+    }
+  };
+
+  if (isCheckingAuth) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <span className="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    );
   }
 
-  const handleVerify = async () => {
-    setLoading(true);
-    setMessage("");
-
-    try {
-      const res = await axios.post("http://localhost:5000/api/auth/verify-otp", {
-        email,
-        otp,
-      });
-
-      console.log("Server Response:", res.data);
-
-      if (res.status === 200) {
-        setMessage("Xác thực thành công!");
-        localStorage.setItem("accessToken", res.data.accessToken);  // Lưu accessToken
-        setIsAuthenticated(true);  // Cập nhật trạng thái isAuthenticated trong App
-        setTimeout(() => {
-          navigate("/home");
-        }, 2000);
-      } else {
-        setMessage("Xác thực thất bại!");
-      }
-    } catch (err) {
-      console.error(err.response);
-      setMessage(err.response?.data?.message || "Lỗi khi xác thực OTP");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResendOTP = async () => {
-    setMessage(""); // Xóa thông báo cũ
-    setLoading(true);
-
-    try {
-      const res = await axios.post("http://localhost:5000/api/auth/resend-otp", {
-        email,
-      });
-
-      if (res.status === 200) {
-        setMessage("Mã OTP mới đã được gửi!");
-      } else {
-        setMessage("Không thể gửi lại mã OTP!");
-      }
-    } catch (err) {
-      setMessage("Lỗi khi gửi lại OTP");
-    } finally {
-      setLoading(false); 
-    }
-  };
-
-
   return (
-    <Box sx={{ maxWidth: 400, margin: "auto", mt: 6 }}>
-      <Typography variant="h5" mb={2}>Xác thực OTP</Typography>
-      <Typography mb={1}>
-        Nhập mã OTP đã gửi tới email: <strong>{email}</strong>
-      </Typography>
-      <TextField
-        fullWidth
-        label="Mã OTP"
-        value={otp}
-        onChange={(e) => setOtp(e.target.value)}
-        margin="normal"
-      />
-      <Button
-        fullWidth
-        variant="contained"
-        color="primary"
-        onClick={handleVerify}
-        sx={{ mt: 2 }}
-        disabled={loading}
-      >
-        {loading ? <CircularProgress size={20} /> : "Xác nhận"}
-      </Button>
-      <Button
-        fullWidth
-        variant="text"
-        onClick={handleResendOTP}
-        sx={{ mt: 2 }}
-        disabled={loading}
-      >
-        {loading ? <CircularProgress size={20} /> : "Gửi lại mã OTP"}
-      </Button>
-      {message && (
-        <Typography mt={2} color={message === "Xác thực thành công!" ? "green" : "red"}>
-          {message}
-        </Typography>
-      )}
-    </Box>
+    <div className="min-h-screen bg-base-200 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-base-content">
+          Xác thực tài khoản
+        </h2>
+        <p className="mt-2 text-center text-sm text-base-content/70">
+          Nhập mã OTP đã được gửi đến email {email}
+        </p>
+      </div>
+
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="card bg-base-100 shadow-xl">
+          <div className="card-body">
+            <form onSubmit={handleSubmit}>
+              <div className="flex justify-center space-x-2 mb-6">
+                {otp.map((digit, index) => (
+                  <input
+                    key={index}
+                    ref={(ref) => (inputRefs.current[index] = ref)}
+                    type="text"
+                    maxLength="1"
+                    value={digit}
+                    onChange={(e) => handleOtpChange(e, index)}
+                    onKeyDown={(e) => handleKeyDown(e, index)}
+                    className="input input-bordered w-12 h-12 text-center text-xl"
+                    autoFocus={index === 0}
+                  />
+                ))}
+              </div>
+
+              <div>
+                <Button
+                  type="submit"
+                  className="w-full mb-4"
+                  isLoading={isLoading}
+                >
+                  Xác thực
+                </Button>
+              </div>
+
+              <div className="text-center">
+                {canResend ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={handleResendOTP}
+                    isLoading={resendLoading}
+                  >
+                    Gửi lại mã OTP
+                  </Button>
+                ) : (
+                  <p className="text-base-content/70">
+                    Gửi lại mã sau {countdown} giây
+                  </p>
+                )}
+              </div>
+
+              <div className="mt-4 text-center">
+                <Link to="/login" className="link link-primary">
+                  Quay lại đăng nhập
+                </Link>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
-export default VerifyOtpPage;
+export default VerifyOTPPage;
