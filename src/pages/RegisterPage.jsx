@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import FormInput from "../components/common/FormInput";
 import Button from "../components/common/Button";
 import useAuthStore from "../stores/authStore";
 import { useRedirectIfAuthenticated } from "../hooks/useAuth";
 import { toast } from "react-hot-toast";
+import debounce from "lodash.debounce";
+import authService from "../services/authService";
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -15,9 +17,32 @@ const RegisterPage = () => {
     confirmPassword: "",
   });
   const [errors, setErrors] = useState({});
+  const [emailChecking, setEmailChecking] = useState(false);
   const { register, isLoading, error, resetError } = useAuthStore();
   const navigate = useNavigate();
   const { isLoading: isCheckingAuth } = useRedirectIfAuthenticated();
+  const debounceCheckEmail = useRef(
+  debounce(async (email) => {
+    setEmailChecking(true);
+    try {
+      const res = await authService.checkEmailExists(email);
+      if (res && res.exists) { // Sửa ở đây
+        setErrors((prev) => ({
+          ...prev,
+          email: "Email đã tồn tại",
+        }));
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          email: undefined,
+        }));
+      }
+    } catch (e) {
+      // Có thể xử lý lỗi nếu cần
+    }
+    setEmailChecking(false);
+  }, 500)
+).current;
 
   useEffect(() => {
     if (error) {
@@ -31,6 +56,10 @@ const RegisterPage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+    // Kiểm tra email realtime
+    if (name === "email" && /\S+@\S+\.\S+/.test(value)) {
+      debounceCheckEmail(value);
     }
   };
 
@@ -124,6 +153,7 @@ const RegisterPage = () => {
                 value={formData.email}
                 onChange={handleChange}
                 error={errors.email}
+                loading={emailChecking}
               />
 
               <FormInput

@@ -1,6 +1,12 @@
 import api from "../utils/apiClient";
 
 const authService = {
+  checkEmailExists: async (email) => {
+  // Truyền email trực tiếp vào URL query string
+  const res = await api.get(`/user/check-email?email=${encodeURIComponent(email)}`);
+  return res.data; //"exists": false/true
+},
+
   // Đăng ký tài khoản
   register: async (userData) => {
     try {
