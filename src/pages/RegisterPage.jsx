@@ -20,8 +20,10 @@ const RegisterPage = () => {
   const [emailChecking, setEmailChecking] = useState(false);
   const [phoneChecking, setPhoneChecking] = useState(false);
   const { register, isLoading, error, resetError } = useAuthStore();
+
   const navigate = useNavigate();
   const { isLoading: isCheckingAuth } = useRedirectIfAuthenticated();
+  
   const debounceCheckEmail = useRef(
     debounce(async (email) => {
       setEmailChecking(true);
@@ -95,9 +97,17 @@ const RegisterPage = () => {
     setErrors((prev) => ({ ...prev, [name]: "" }));
 
     // Kiểm tra email realtime
-    if (name === "email" && /\S+@\S+\.\S+/.test(value)) {
-      debounceCheckEmail(value);
+    if (name === "email") {
+      if (!/\S+@\S+\.\S+/.test(value)) {
+        setErrors((prev) => ({
+          ...prev,
+          email: "Email không hợp lệ",
+        }));
+      } else {
+        debounceCheckEmail(value);
+      }
     }
+
     // Kiểm tra phone realtime
     if (name === "phone") {
       debounceCheckPhone(value);
