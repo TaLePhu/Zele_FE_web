@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import FormInput from "../components/common/FormInput";
 import Button from "../components/common/Button";
 import useAuthStore from "../stores/authStore";
 import { useRedirectIfAuthenticated } from "../hooks/useAuth";
 import { toast } from "react-hot-toast";
+import debounce from "lodash.debounce";
+import authService from "../services/authService";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -15,9 +18,72 @@ const RegisterPage = () => {
     confirmPassword: "",
   });
   const [errors, setErrors] = useState({});
+  const [emailChecking, setEmailChecking] = useState(false);
+  const [phoneChecking, setPhoneChecking] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { register, isLoading, error, resetError } = useAuthStore();
+
   const navigate = useNavigate();
   const { isLoading: isCheckingAuth } = useRedirectIfAuthenticated();
+  
+  const debounceCheckEmail = useRef(
+    debounce(async (email) => {
+      setEmailChecking(true);
+      try {
+        const res = await authService.checkEmailExists(email);
+        if (res && res.exists) {
+          setErrors((prev) => ({
+            ...prev,
+            email: "Email đã tồn tại",
+          }));
+        } else {
+          setErrors((prev) => ({
+            ...prev,
+            email: undefined,
+          }));
+        }
+      } catch (e) {
+        // Có thể xử lý lỗi nếu cần
+      }
+      setEmailChecking(false);
+    }, 500)
+  ).current;
+
+  const debounceCheckPhone = useRef(
+    debounce(async (phone) => {
+      // Regex: bắt đầu bằng 0 và đủ 10 số
+      if (!/^0\d{9}$/.test(phone)) {
+        setErrors((prev) => ({
+          ...prev,
+          phone: "Số điện thoại phải bắt đầu bằng số 0 và có 10 chữ số",
+        }));
+        setPhoneChecking(false);
+        return;
+      }
+      setPhoneChecking(true);
+      try {
+        const res = await authService.checkPhoneExists(phone);
+        if (res && res.exists) {
+          setErrors((prev) => ({
+            ...prev,
+            phone: "Số điện thoại đã tồn tại",
+          }));
+        } else {
+          setErrors((prev) => ({
+            ...prev,
+            phone: undefined,
+          }));
+        }
+      } catch (e) {
+        setErrors((prev) => ({
+          ...prev,
+          phone: "Không thể kiểm tra số điện thoại",
+        }));
+      }
+      setPhoneChecking(false);
+    }, 500)
+  ).current;
 
   useEffect(() => {
     if (error) {
@@ -29,8 +95,58 @@ const RegisterPage = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
+
+    // Xóa lỗi cũ khi nhập lại
+    setErrors((prev) => ({ ...prev, [name]: "" }));
+
+    // Kiểm tra email realtime
+    if (name === "email") {
+      if (!/\S+@\S+\.\S+/.test(value)) {
+        setErrors((prev) => ({
+          ...prev,
+          email: "Email không hợp lệ",
+        }));
+      } else {
+        debounceCheckEmail(value);
+      }
+    }
+
+    // Kiểm tra phone realtime
+    if (name === "phone") {
+      debounceCheckPhone(value);
+    }
+
+    // Kiểm tra mật khẩu realtime
+    if (name === "password") {
+      let passwordError = "";
+      if (value.length < 6) {
+        passwordError = "Mật khẩu phải có ít nhất 6 ký tự";
+      } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(value)) {
+        passwordError = "Mật khẩu phải có ít nhất 1 ký tự đặc biệt";
+      }
+      setErrors((prev) => ({ ...prev, password: passwordError }));
+
+      // Kiểm tra lại xác nhận mật khẩu nếu đã nhập
+      if (formData.confirmPassword && value !== formData.confirmPassword) {
+        setErrors((prev) => ({
+          ...prev,
+          confirmPassword: "Mật khẩu xác nhận không khớp",
+        }));
+      } else {
+        setErrors((prev) => ({ ...prev, confirmPassword: "" }));
+      }
+    }
+
+    // Kiểm tra xác nhận mật khẩu realtime
+    if (name === "confirmPassword") {
+      if (value !== formData.password) {
+        setErrors((prev) => ({
+          ...prev,
+          confirmPassword: "Mật khẩu xác nhận không khớp",
+        }));
+      } else {
+        setErrors((prev) => ({ ...prev, confirmPassword: "" }));
+      }
     }
   };
 
@@ -124,6 +240,7 @@ const RegisterPage = () => {
                 value={formData.email}
                 onChange={handleChange}
                 error={errors.email}
+                loading={emailChecking}
               />
 
               <FormInput
@@ -133,26 +250,47 @@ const RegisterPage = () => {
                 value={formData.phone}
                 onChange={handleChange}
                 error={errors.phone}
+                loading={phoneChecking}
               />
 
               <FormInput
                 label="Mật khẩu"
                 name="password"
-                type="password"
-                placeholder="Mật khẩu (ít nhất 6 ký tự)"
+                type={showPassword ? "text" : "password"}
+                placeholder="Mật khẩu (ít nhất 6 ký tự) và có ít nhất 1 ký tự đặc biệt"
                 value={formData.password}
                 onChange={handleChange}
                 error={errors.password}
+                rightIcon={
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="focus:outline-none"
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                }
               />
 
               <FormInput
                 label="Xác nhận mật khẩu"
                 name="confirmPassword"
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 placeholder="Nhập lại mật khẩu"
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 error={errors.confirmPassword}
+                rightIcon={
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    onClick={() => setShowConfirmPassword((v) => !v)}
+                    className="focus:outline-none"
+                  >
+                    {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                }
               />
 
               <div>

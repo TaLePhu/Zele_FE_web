@@ -1,6 +1,19 @@
 import api from "../utils/apiClient";
 
 const authService = {
+  // Kiểm tra email đã tồn tại
+  checkEmailExists: async (email) => {
+  // Truyền email trực tiếp vào URL query string
+  const res = await api.get(`/user/check-email?email=${encodeURIComponent(email)}`);
+  return res.data; //"exists": false/true
+},
+
+// Kiểm tra số điện thoại đã tồn tại
+checkPhoneExists: async (phone) => {
+    const res = await api.get(`/user/check-phone?phone=${encodeURIComponent(phone)}`);
+    return res.data; //"exists": false/true
+  },
+
   // Đăng ký tài khoản
   register: async (userData) => {
     try {
