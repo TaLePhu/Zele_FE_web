@@ -7,6 +7,7 @@ import { useRedirectIfAuthenticated } from "../hooks/useAuth";
 import { toast } from "react-hot-toast";
 import debounce from "lodash.debounce";
 import authService from "../services/authService";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -19,6 +20,8 @@ const RegisterPage = () => {
   const [errors, setErrors] = useState({});
   const [emailChecking, setEmailChecking] = useState(false);
   const [phoneChecking, setPhoneChecking] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { register, isLoading, error, resetError } = useAuthStore();
 
   const navigate = useNavigate();
@@ -253,21 +256,41 @@ const RegisterPage = () => {
               <FormInput
                 label="Mật khẩu"
                 name="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="Mật khẩu (ít nhất 6 ký tự)"
                 value={formData.password}
                 onChange={handleChange}
                 error={errors.password}
+                rightIcon={
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="focus:outline-none"
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                }
               />
 
               <FormInput
                 label="Xác nhận mật khẩu"
                 name="confirmPassword"
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 placeholder="Nhập lại mật khẩu"
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 error={errors.confirmPassword}
+                rightIcon={
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    onClick={() => setShowConfirmPassword((v) => !v)}
+                    className="focus:outline-none"
+                  >
+                    {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                }
               />
 
               <div>
