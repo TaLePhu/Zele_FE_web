@@ -90,9 +90,10 @@ const RegisterPage = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
+
+    // Xóa lỗi cũ khi nhập lại
+    setErrors((prev) => ({ ...prev, [name]: "" }));
+
     // Kiểm tra email realtime
     if (name === "email" && /\S+@\S+\.\S+/.test(value)) {
       debounceCheckEmail(value);
@@ -100,6 +101,39 @@ const RegisterPage = () => {
     // Kiểm tra phone realtime
     if (name === "phone") {
       debounceCheckPhone(value);
+    }
+
+    // Kiểm tra mật khẩu realtime
+    if (name === "password") {
+      let passwordError = "";
+      if (value.length < 6) {
+        passwordError = "Mật khẩu phải có ít nhất 6 ký tự";
+      } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(value)) {
+        passwordError = "Mật khẩu phải có ít nhất 1 ký tự đặc biệt";
+      }
+      setErrors((prev) => ({ ...prev, password: passwordError }));
+
+      // Kiểm tra lại xác nhận mật khẩu nếu đã nhập
+      if (formData.confirmPassword && value !== formData.confirmPassword) {
+        setErrors((prev) => ({
+          ...prev,
+          confirmPassword: "Mật khẩu xác nhận không khớp",
+        }));
+      } else {
+        setErrors((prev) => ({ ...prev, confirmPassword: "" }));
+      }
+    }
+
+    // Kiểm tra xác nhận mật khẩu realtime
+    if (name === "confirmPassword") {
+      if (value !== formData.password) {
+        setErrors((prev) => ({
+          ...prev,
+          confirmPassword: "Mật khẩu xác nhận không khớp",
+        }));
+      } else {
+        setErrors((prev) => ({ ...prev, confirmPassword: "" }));
+      }
     }
   };
 
