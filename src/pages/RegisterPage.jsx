@@ -18,31 +18,67 @@ const RegisterPage = () => {
   });
   const [errors, setErrors] = useState({});
   const [emailChecking, setEmailChecking] = useState(false);
+  const [phoneChecking, setPhoneChecking] = useState(false);
   const { register, isLoading, error, resetError } = useAuthStore();
   const navigate = useNavigate();
   const { isLoading: isCheckingAuth } = useRedirectIfAuthenticated();
   const debounceCheckEmail = useRef(
-  debounce(async (email) => {
-    setEmailChecking(true);
-    try {
-      const res = await authService.checkEmailExists(email);
-      if (res && res.exists) { // Sửa ở đây
+    debounce(async (email) => {
+      setEmailChecking(true);
+      try {
+        const res = await authService.checkEmailExists(email);
+        if (res && res.exists) {
+          setErrors((prev) => ({
+            ...prev,
+            email: "Email đã tồn tại",
+          }));
+        } else {
+          setErrors((prev) => ({
+            ...prev,
+            email: undefined,
+          }));
+        }
+      } catch (e) {
+        // Có thể xử lý lỗi nếu cần
+      }
+      setEmailChecking(false);
+    }, 500)
+  ).current;
+
+  const debounceCheckPhone = useRef(
+    debounce(async (phone) => {
+      // Regex: bắt đầu bằng 0 và đủ 10 số
+      if (!/^0\d{9}$/.test(phone)) {
         setErrors((prev) => ({
           ...prev,
-          email: "Email đã tồn tại",
+          phone: "Số điện thoại phải bắt đầu bằng số 0 và có 10 chữ số",
         }));
-      } else {
+        setPhoneChecking(false);
+        return;
+      }
+      setPhoneChecking(true);
+      try {
+        const res = await authService.checkPhoneExists(phone);
+        if (res && res.exists) {
+          setErrors((prev) => ({
+            ...prev,
+            phone: "Số điện thoại đã tồn tại",
+          }));
+        } else {
+          setErrors((prev) => ({
+            ...prev,
+            phone: undefined,
+          }));
+        }
+      } catch (e) {
         setErrors((prev) => ({
           ...prev,
-          email: undefined,
+          phone: "Không thể kiểm tra số điện thoại",
         }));
       }
-    } catch (e) {
-      // Có thể xử lý lỗi nếu cần
-    }
-    setEmailChecking(false);
-  }, 500)
-).current;
+      setPhoneChecking(false);
+    }, 500)
+  ).current;
 
   useEffect(() => {
     if (error) {
@@ -60,6 +96,10 @@ const RegisterPage = () => {
     // Kiểm tra email realtime
     if (name === "email" && /\S+@\S+\.\S+/.test(value)) {
       debounceCheckEmail(value);
+    }
+    // Kiểm tra phone realtime
+    if (name === "phone") {
+      debounceCheckPhone(value);
     }
   };
 
@@ -163,6 +203,7 @@ const RegisterPage = () => {
                 value={formData.phone}
                 onChange={handleChange}
                 error={errors.phone}
+                loading={phoneChecking}
               />
 
               <FormInput
