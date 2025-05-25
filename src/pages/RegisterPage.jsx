@@ -257,7 +257,7 @@ const RegisterPage = () => {
                 label="Mật khẩu"
                 name="password"
                 type={showPassword ? "text" : "password"}
-                placeholder="Mật khẩu (ít nhất 6 ký tự)"
+                placeholder="Mật khẩu (ít nhất 6 ký tự) và có ít nhất 1 ký tự đặc biệt"
                 value={formData.password}
                 onChange={handleChange}
                 error={errors.password}
