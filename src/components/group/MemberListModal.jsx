@@ -6,18 +6,24 @@ import {
   UserMinus,
   ShieldCheck,
   MessageSquare,
+  Settings,
+  Cog,
 } from "lucide-react";
 import useAuthStore from "../../stores/authStore";
 import useGroupStore from "../../stores/groupStore";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import AddMemberModal from "./AddMemberModal";
+import RoleManagementModal from "./RoleManagementModal";
+import GroupSettingsModal from "./GroupSettingsModal";
 
 const MemberListModal = ({ isOpen, onClose, group, onBack }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activePopupMemberId, setActivePopupMemberId] = useState(null);
   const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
+  const [showRoleManagementModal, setShowRoleManagementModal] = useState(false);
+  const [showGroupSettingsModal, setShowGroupSettingsModal] = useState(false);
   const popupRef = useRef(null);
   const { user } = useAuthStore();
   const { removeMember, changeRole, transferOwnership } = useGroupStore();
@@ -206,6 +212,26 @@ const MemberListModal = ({ isOpen, onClose, group, onBack }) => {
     setShowAddMemberModal(false);
   };
 
+  // Xử lý mở modal phân quyền
+  const handleOpenRoleManagement = () => {
+    setShowRoleManagementModal(true);
+  };
+
+  // Xử lý đóng modal phân quyền
+  const handleCloseRoleManagement = () => {
+    setShowRoleManagementModal(false);
+  };
+
+  // Xử lý mở modal cài đặt nhóm
+  const handleOpenGroupSettings = () => {
+    setShowGroupSettingsModal(true);
+  };
+
+  // Xử lý đóng modal cài đặt nhóm
+  const handleCloseGroupSettings = () => {
+    setShowGroupSettingsModal(false);
+  };
+
   if (!isOpen) return null;
 
   // Nếu đang hiển thị modal thêm thành viên
@@ -215,6 +241,30 @@ const MemberListModal = ({ isOpen, onClose, group, onBack }) => {
         isOpen={showAddMemberModal}
         onClose={onClose}
         onBack={handleCloseAddMemberModal}
+        group={group}
+      />
+    );
+  }
+
+  // Nếu đang hiển thị modal phân quyền
+  if (showRoleManagementModal) {
+    return (
+      <RoleManagementModal
+        isOpen={showRoleManagementModal}
+        onClose={onClose}
+        onBack={handleCloseRoleManagement}
+        group={group}
+      />
+    );
+  }
+
+  // Nếu đang hiển thị modal cài đặt nhóm
+  if (showGroupSettingsModal) {
+    return (
+      <GroupSettingsModal
+        isOpen={showGroupSettingsModal}
+        onClose={onClose}
+        onBack={handleCloseGroupSettings}
         group={group}
       />
     );
@@ -251,8 +301,8 @@ const MemberListModal = ({ isOpen, onClose, group, onBack }) => {
           </button>
         </div>
 
-        {/* Thêm thành viên button */}
-        <div className="p-4 border-b">
+        {/* Action buttons */}
+        <div className="p-4 border-b space-y-3">
           <button
             className="w-full py-3 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center"
             onClick={handleOpenAddMemberModal}
@@ -260,6 +310,27 @@ const MemberListModal = ({ isOpen, onClose, group, onBack }) => {
             <UserPlus size={20} className="mr-2" />
             <span className="font-medium">Thêm thành viên</span>
           </button>
+
+          {/* Chỉ hiển thị các nút quản lý cho admin */}
+          {isAdmin && (
+            <>
+              <button
+                className="w-full py-3 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-md flex items-center justify-center border border-blue-200"
+                onClick={handleOpenRoleManagement}
+              >
+                <Settings size={20} className="mr-2" />
+                <span className="font-medium">Phân quyền thành viên</span>
+              </button>
+
+              <button
+                className="w-full py-3 bg-green-50 hover:bg-green-100 text-green-600 rounded-md flex items-center justify-center border border-green-200"
+                onClick={handleOpenGroupSettings}
+              >
+                <Cog size={20} className="mr-2" />
+                <span className="font-medium">Cài đặt nhóm</span>
+              </button>
+            </>
+          )}
         </div>
 
         {/* Danh sách thành viên */}
@@ -305,18 +376,22 @@ const MemberListModal = ({ isOpen, onClose, group, onBack }) => {
                     </div>
                     <div>
                       <div className="flex items-center">
-                        {" "}
                         <h3 className="font-medium">
                           {isCurrentUser ? "Bạn" : memberName}
                         </h3>
                         {memberRole === "admin" && (
-                          <span className="ml-2 text-xs text-gray-500">
+                          <span className="ml-2 text-xs text-red-600 bg-red-100 px-2 py-1 rounded">
                             Trưởng nhóm
                           </span>
                         )}
                         {memberRole === "moderator" && (
-                          <span className="ml-2 text-xs text-blue-500">
+                          <span className="ml-2 text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
                             Điều hành viên
+                          </span>
+                        )}
+                        {memberRole === "member" && (
+                          <span className="ml-2 text-xs text-gray-500">
+                            Thành viên
                           </span>
                         )}
                       </div>

@@ -353,6 +353,11 @@ const GroupInfoModal = ({ isOpen, onClose, group }) => {
           <div className="px-4 py-3">
             <h4 className="font-medium">
               Thành viên ({groupData.members?.length || 0})
+              {isAdmin && (
+                <span className="text-xs text-blue-600 ml-2">
+                  (Nhấn để quản lý)
+                </span>
+              )}
             </h4>
           </div>
 
@@ -388,14 +393,14 @@ const GroupInfoModal = ({ isOpen, onClose, group }) => {
                         {(memberUser?.name || "").substring(0, 1)}
                       </div>
                     )}
-                  </div>{" "}
+                  </div>
                   {isAdmin && (
-                    <div className="absolute -bottom-1 -right-1 bg-blue-500 text-white text-[8px] rounded-full px-1 py-0.5">
+                    <div className="absolute -bottom-1 -right-1 bg-red-500 text-white text-[8px] rounded-full px-1 py-0.5">
                       Admin
                     </div>
                   )}
                   {isModerator && (
-                    <div className="absolute -bottom-1 -right-1 bg-green-500 text-white text-[8px] rounded-full px-1 py-0.5">
+                    <div className="absolute -bottom-1 -right-1 bg-blue-500 text-white text-[8px] rounded-full px-1 py-0.5">
                       Mod
                     </div>
                   )}

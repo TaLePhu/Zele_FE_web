@@ -92,11 +92,36 @@ const groupService = {
       throw error;
     }
   },
+
+  // Chuyển quyền sở hữu nhóm và rời nhóm
+  transferOwnershipAndLeave: async (groupId, newOwnerId) => {
+    try {
+      return await api.post("/group/transfer-ownership-and-leave", {
+        groupId,
+        newOwnerId,
+      });
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Chuyển quyền admin và rời nhóm
+  transferAdminAndLeave: async (groupId, newAdminId) => {
+    try {
+      return await api.post("/group/transfer-admin-and-leave", {
+        groupId,
+        newAdminId,
+      });
+    } catch (error) {
+      throw error;
+    }
+  },
+
   // Cập nhật thông tin nhóm
   updateGroup: async (groupId, updateData, isFormData = false) => {
     try {
       let formData;
-      
+
       // Nếu đã là FormData thì sử dụng trực tiếp
       if (isFormData && updateData instanceof FormData) {
         formData = updateData;
@@ -116,7 +141,7 @@ const groupService = {
         if (updateData.settings) {
           formData.append("settings", JSON.stringify(updateData.settings));
         }
-        
+
         // Kiểm tra nếu có yêu cầu xóa avatar
         if (updateData.removeAvatar) {
           formData.append("removeAvatar", "true");

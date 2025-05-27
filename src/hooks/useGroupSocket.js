@@ -71,8 +71,7 @@ const useGroupSocket = () => {
       }
 
       toast(
-        `${
-          data.newMember?.user?.name || "Thành viên mới"
+        `${data.newMember?.user?.name || "Thành viên mới"
         } đã được thêm vào nhóm`,
         {
           icon: "ℹ️",
@@ -113,28 +112,28 @@ const useGroupSocket = () => {
     });    // Lắng nghe khi có tin nhắn nhóm bị thu hồi
     socket.on("messageRevoked", ({ messageId, is_revoked, isGroupMessage, conversationId }) => {
       console.log("🔔 Group message revoked:", messageId, "in conversation:", conversationId);
-      
+
       if (isGroupMessage && conversationId) {
         // Cập nhật tin nhắn trong store để hiển thị trạng thái thu hồi
         const { updateRevokedMessage } = useConversationStore.getState();
-        
+
         // Kiểm tra xem tin nhắn này thuộc về cuộc trò chuyện nhóm hiện tại không
         const { currentConversation } = useConversationStore.getState();
-        const isCurrentConversation = currentConversation && 
-                                    currentConversation._id === conversationId;
-        
+        const isCurrentConversation = currentConversation &&
+          currentConversation._id === conversationId;
+
         // Log để debug
         console.log(`Is message in current conversation: ${isCurrentConversation}`);
         console.log(`Current conversation ID: ${currentConversation?._id}, Message conversation ID: ${conversationId}`);
-        
+
         // Cập nhật trạng thái tin nhắn
         updateRevokedMessage(messageId);
-        
+
         // Chỉ hiển thị toast nếu đang ở trong cuộc trò chuyện nhóm này
         if (isCurrentConversation) {
           toast.success("Tin nhắn nhóm đã được thu hồi");
         }
-        
+
         // Đóng toast "đang thu hồi" nếu có
         toast.dismiss("revoking");
       }
@@ -161,8 +160,7 @@ const useGroupSocket = () => {
           )?.user?.name || "Thành viên khác";
 
         toast.success(
-          `Quyền quản trị viên đã được chuyển cho ${adminName} và ${
-            data.removedMember === user._id ? "bạn" : "một thành viên"
+          `Quyền quản trị viên đã được chuyển cho ${adminName} và ${data.removedMember === user._id ? "bạn" : "một thành viên"
           } đã rời nhóm`,
           { duration: 5000 }
         );
@@ -259,8 +257,7 @@ const useGroupSocket = () => {
       // Kiểm tra xem đây có phải là chuyển quyền admin trước khi rời nhóm hay không
       if (data.wasAdmin && data.newRole === "admin") {
         toast.success(
-          `Quyền quản trị viên đã được chuyển cho ${
-            data.memberId === user._id ? "bạn" : "một thành viên khác"
+          `Quyền quản trị viên đã được chuyển cho ${data.memberId === user._id ? "bạn" : "một thành viên khác"
           }`
         );
       }
@@ -274,8 +271,7 @@ const useGroupSocket = () => {
       // Xử lý trường hợp hạ quyền admin xuống thành viên thường
       else if (data.previousRole === "admin" && data.newRole === "member") {
         toast(
-          `${
-            isCurrentUser ? "Bạn" : "Trưởng nhóm cũ"
+          `${isCurrentUser ? "Bạn" : "Trưởng nhóm cũ"
           } đã chuyển thành thành viên thường`,
           {
             icon: "ℹ️",
@@ -286,8 +282,7 @@ const useGroupSocket = () => {
       // Xử lý trường hợp gán quyền moderator
       else if (data.newRole === "moderator") {
         toast.success(
-          `${
-            isCurrentUser ? "Bạn" : "Một thành viên"
+          `${isCurrentUser ? "Bạn" : "Một thành viên"
           } đã được cấp quyền điều hành viên`,
           { duration: 3000 }
         );
@@ -301,12 +296,10 @@ const useGroupSocket = () => {
       // Các trường hợp khác
       else {
         toast(
-          `Vai trò của ${
-            data.memberId === user._id ? "bạn" : "một thành viên"
-          } đã được thay đổi thành ${
-            data.newRole === "admin"
-              ? "quản trị viên"
-              : data.newRole === "moderator"
+          `Vai trò của ${data.memberId === user._id ? "bạn" : "một thành viên"
+          } đã được thay đổi thành ${data.newRole === "admin"
+            ? "quản trị viên"
+            : data.newRole === "moderator"
               ? "điều hành viên"
               : "thành viên"
           }`,
@@ -432,8 +425,7 @@ const useGroupSocket = () => {
       console.log("🔔 Socket event: memberJoinedViaLink", data);
       handleMemberAdded(data);
       toast(
-        `${
-          data.newMember?.user?.name || "Thành viên mới"
+        `${data.newMember?.user?.name || "Thành viên mới"
         } đã tham gia nhóm qua link mời`,
         {
           icon: "ℹ️",
@@ -450,14 +442,14 @@ const useGroupSocket = () => {
       console.log("🔔 Socket event: inviteLinkRegenerated", data);
       // Có thể thêm xử lý cập nhật liên kết mời mới ở đây
     });
-    
+
     // Lắng nghe khi có tin nhắn bị thu hồi (đặc biệt là trong nhóm)
     socket.on("messageRevoked", ({ messageId, is_revoked, isGroupMessage, conversationId }) => {
       console.log("🔔 Group Socket: Message revoked:", messageId, "isGroupMessage:", isGroupMessage);
       // Cập nhật tin nhắn trong store để hiển thị trạng thái thu hồi
       const { updateRevokedMessage } = useConversationStore.getState();
       updateRevokedMessage(messageId);
-      
+
       // Hiển thị thông báo chỉ khi đây là tin nhắn nhóm
       if (isGroupMessage) {
         toast.success("Tin nhắn nhóm đã được thu hồi");
@@ -515,7 +507,7 @@ const useGroupSocket = () => {
       socket.off("conversationInfoUpdated");
       socket.off("newGroupCreated");
       socket.off("groupDeleted");
-      socket.off("joinedGroupViaLink");      socket.off("memberJoinedViaLink");
+      socket.off("joinedGroupViaLink"); socket.off("memberJoinedViaLink");
       socket.off("inviteLinkStatusUpdated");
       socket.off("inviteLinkRegenerated");
       socket.off("messageRevoked");
