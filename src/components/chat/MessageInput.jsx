@@ -81,6 +81,23 @@ const MessageInput = memo(({
     }
   };
 
+  const handleLikeClick = async () => {
+    if (isLoadingMessages || isUploading) return;
+    
+    try {
+      setIsUploading(true);
+      const result = await onSendMessage("👍", null);
+      
+      if (result.success) {
+        textInputRef.current?.focus();
+      }
+    } catch (error) {
+      console.error("Error sending like emoji", error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <>
       {selectedFile && (
@@ -145,13 +162,10 @@ const MessageInput = memo(({
           </div>
 
           <button
-            type="submit"
-            disabled={
-              (!newMessage.trim() && !selectedFile) ||
-              isLoadingMessages ||
-              isUploading
-            }
+            type={newMessage.trim() || selectedFile ? "submit" : "button"}
+            disabled={isLoadingMessages || isUploading}
             className="ml-2 p-2 text-blue-500 hover:bg-gray-100 rounded-full disabled:opacity-50"
+            onClick={newMessage.trim() || selectedFile ? undefined : handleLikeClick}
           >
             {isLoadingMessages || isUploading ? (
               <span className="loading loading-spinner loading-sm"></span>
