@@ -1,11 +1,12 @@
 import { useState, useRef, memo } from "react";
 import {
   MdImage,
-  MdOutlineEmojiEmotions,
   MdAttachFile,
   MdSend,
   MdThumbUp,
 } from "react-icons/md";
+import EmojiButton from "../emoji/EmojiButton";
+import { toast } from "react-hot-toast";
 
 const MessageInput = memo(({ 
   onSendMessage, 
@@ -17,6 +18,7 @@ const MessageInput = memo(({
   const [selectedFile, setSelectedFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
+  const textInputRef = useRef(null);
 
   const handleFileSelect = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -26,6 +28,28 @@ const MessageInput = memo(({
         return;
       }
       setSelectedFile(file);
+    }
+  };
+
+  const handleEmojiSelect = (emoji) => {
+    const input = textInputRef.current;
+    if (input) {
+      const startPos = input.selectionStart;
+      const endPos = input.selectionEnd;
+      const textBefore = newMessage.substring(0, startPos);
+      const textAfter = newMessage.substring(endPos);
+      const newText = textBefore + emoji + textAfter;
+      
+      setNewMessage(newText);
+      
+      // Đặt con trỏ sau emoji
+      setTimeout(() => {
+        input.focus();
+        const newCursorPos = startPos + emoji.length;
+        input.setSelectionRange(newCursorPos, newCursorPos);
+      }, 0);
+    } else {
+      setNewMessage(prev => prev + emoji);
     }
   };
 
@@ -48,6 +72,7 @@ const MessageInput = memo(({
       if (result.success) {
         setNewMessage("");
         setSelectedFile(null);
+        textInputRef.current?.focus();
       }
     } catch (error) {
       console.error("Error sending message", error);
@@ -103,19 +128,20 @@ const MessageInput = memo(({
 
           <div className="flex-1 relative">
             <input
+              ref={textInputRef}
               type="text"
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder={getInputPlaceholder()}
-              className="w-full py-2 px-4 rounded-full bg-gray-100 focus:outline-none"
+              className="w-full py-2 px-4 pr-12 rounded-full bg-gray-100 focus:outline-none"
               disabled={isLoadingMessages || isUploading}
             />
-            <button
-              type="button"
-              className="absolute right-3 top-2 text-gray-500"
-            >
-              <MdOutlineEmojiEmotions size={20} />
-            </button>
+            <div className="absolute right-3 top-2">
+              <EmojiButton
+                onEmojiSelect={handleEmojiSelect}
+                position="top"
+              />
+            </div>
           </div>
 
           <button

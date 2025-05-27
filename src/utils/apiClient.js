@@ -52,12 +52,12 @@ apiClient.interceptors.response.use(
     if (error.message === 'Network Error') {
       console.error('CORS Error: The API server might not allow cross-origin requests from this origin.');
       toast.error('Không thể kết nối đến máy chủ. Vui lòng kiểm tra CORS settings.');
-      
+
       // Thêm hướng dẫn cho developer trong console
       console.info('Developer note: Make sure your backend has proper CORS configuration:');
       console.info('app.use(cors({ origin: "http://localhost:5173", credentials: true }));');
     }
-    
+
     // Xử lý lỗi response
     const errorMessage =
       error.response?.data?.message ||
